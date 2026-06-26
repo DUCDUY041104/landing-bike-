@@ -1,0 +1,270 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+  
+  /* Brand Theme Tokens (Eco-Sky & Green Hills) */
+  --primary: #10b981; /* Emerald base green */
+  --primary-light: #34d399; /* Light green accent */
+  --primary-dark: #047857; /* Deeper green for AA compliance contrast */
+  --primary-glow: rgba(16, 185, 129, 0.15);
+  
+  --sky-base: #0ea5e9; /* Sky blue */
+  --sky-deep: #0369a1; /* Deep contrast sky */
+  --sky-light: #e0f2fe; /* Light background sky */
+  --sky-mist: #f0f9ff; /* Page canvas gradient overlay */
+  
+  --background: #ffffff;
+  --foreground: #0f172a; /* Slate-900 (High contrast text) */
+  
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  
+  --secondary: #f0f9ff; /* Sky Mist surface */
+  --secondary-foreground: #0369a1; /* Sky deep text */
+  
+  --muted: #f8fafc;
+  --muted-foreground: #475569; /* Slate-600 */
+  
+  --accent: rgba(16, 185, 129, 0.05);
+  --accent-foreground: #047857;
+  
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  
+  --border: rgba(15, 23, 42, 0.05); /* Soft, clean slate-900/5% */
+  --input: #ffffff;
+  --input-background: #ffffff;
+  --switch-background: #cbd5e1;
+  
+  --font-weight-medium: 500;
+  --font-weight-normal: 400;
+  --ring: #10b981;
+  
+  --chart-1: #10b981;
+  --chart-2: #34d399;
+  --chart-3: #0ea5e9;
+  --chart-4: #0369a1;
+  --chart-5: #f59e0b;
+  
+  --radius: 0.75rem; /* 12px */
+  --radius-card: 1rem; /* 16px */
+  
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #10b981;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #f0f9ff;
+  --sidebar-accent-foreground: #0369a1;
+  --sidebar-border: rgba(15, 23, 42, 0.05);
+  --sidebar-ring: #10b981;
+
+  /* Legacy variable mappings to maintain styling */
+  --eco-green: #10b981;
+  --eco-green-light: #34d399;
+  --eco-sky: #e0f2fe;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  --primary: #10b981;
+  --primary-light: #34d399;
+  --primary-dark: #047857;
+  --secondary: #1e293b;
+  --secondary-foreground: #e0f2fe;
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: rgba(16, 185, 129, 0.15);
+  --accent-foreground: #34d399;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: rgba(255, 255, 255, 0.08);
+  --input: #1e293b;
+  --ring: #10b981;
+  --sidebar: #1e293b;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #10b981;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #0f172a;
+  --sidebar-accent-foreground: #e0f2fe;
+  --sidebar-border: rgba(255, 255, 255, 0.08);
+  --sidebar-ring: #10b981;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary-light: var(--primary-light);
+  --color-primary-dark: var(--primary-dark);
+  --color-primary-glow: var(--primary-glow);
+  --color-sky-base: var(--sky-base);
+  --color-sky-deep: var(--sky-deep);
+  --color-sky-light: var(--sky-light);
+  --color-sky-mist: var(--sky-mist);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: var(--radius-card);
+  --radius-2xl: calc(var(--radius-card) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply text-foreground bg-background;
+    background: linear-gradient(180deg, var(--sky-mist) 0%, #f0fdf4 35%, #ffffff 100%);
+    background-attachment: fixed;
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  h1 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h2 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h3 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  h4 {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  label {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  button {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-medium);
+    line-height: 1.5;
+  }
+
+  input {
+    font-size: var(--text-base);
+    font-weight: var(--font-weight-normal);
+    line-height: 1.5;
+  }
+}
+
+/* ─── Custom Premium SaaS Utilities ────────────────────────────────────────── */
+
+@layer utilities {
+  .bg-tech-grid {
+    background-size: 40px 40px;
+    background-image: 
+      linear-gradient(to right, rgba(15, 23, 42, 0.012) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(15, 23, 42, 0.012) 1px, transparent 1px);
+  }
+
+  .bg-radial-glow {
+    background: radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.03) 0%, transparent 60%);
+  }
+
+  .text-glow-green {
+    text-shadow: 0 2px 10px rgba(16, 185, 129, 0.1);
+  }
+
+  .shadow-glow-green {
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.04);
+  }
+  
+  .glassmorphism {
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+  }
+
+  .eco-card {
+    background-color: #ffffff;
+    border-radius: var(--radius-card); /* 16px */
+    border: 1px solid rgba(15, 23, 42, 0.05); /* border-subtle */
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+  }
+
+  .eco-card-hover {
+    background-color: #ffffff;
+    border-radius: var(--radius-card);
+    border: 1px solid rgba(15, 23, 42, 0.05);
+    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03), 0 1px 3px rgba(0, 0, 0, 0.02);
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .eco-card-hover:hover {
+    box-shadow: 0 12px 28px rgba(16, 185, 129, 0.08), 0 2px 8px rgba(0, 0, 0, 0.02);
+    transform: translateY(-4px);
+  }
+
+  .eco-gradient-text {
+    @apply text-transparent bg-clip-text bg-gradient-to-r from-primary-dark to-primary;
+  }
+
+  .eco-btn-primary {
+    @apply inline-flex items-center gap-2 bg-gradient-to-r from-primary-dark to-primary hover:from-primary hover:to-primary-light text-white font-bold rounded-xl shadow-lg transition-all;
+    box-shadow: 0 4px 14px rgba(16, 185, 129, 0.2);
+  }
+
+  .eco-section-overlay {
+    @apply absolute inset-0 bg-gradient-to-b from-sky-50/50 via-white/80 to-white pointer-events-none z-0;
+  }
+}
