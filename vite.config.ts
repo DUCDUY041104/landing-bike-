@@ -32,5 +32,54 @@ export default defineConfig({
   },
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
-  assetsInclude: ['**/*.svg', '**/*.csv'],
+  assetsInclude: ['**/*.svg', '**/*.csv', '**/*.webp'],
+
+  server: {
+    port: 5173,
+    allowedHosts: [
+      'aliyah-evaporative-interrogatively.ngrok-free.dev',
+      '.ngrok-free.app',
+      '.ngrok.io',
+    ],
+  },
+
+  build: {
+    // Raise warning threshold slightly — our chunks are intentional
+    chunkSizeWarningLimit: 600,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          // React core — tiny, loads first
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/')) {
+            return 'vendor-react'
+          }
+          // Recharts + d3 deps — heavy, only needed for dashboard preview
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-vendor')) {
+            return 'vendor-charts'
+          }
+          // Framer Motion / motion
+          if (id.includes('node_modules/motion') || id.includes('node_modules/framer-motion')) {
+            return 'vendor-motion'
+          }
+          // Supabase client
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase'
+          }
+          // MUI (only used sparingly — isolate so tree-shaking is contained)
+          if (id.includes('node_modules/@mui') || id.includes('node_modules/@emotion')) {
+            return 'vendor-mui'
+          }
+          // Lucide icons
+          if (id.includes('node_modules/lucide-react')) {
+            return 'vendor-icons'
+          }
+          // Radix UI primitives
+          if (id.includes('node_modules/@radix-ui')) {
+            return 'vendor-radix'
+          }
+        },
+      },
+    },
+  },
 })
+

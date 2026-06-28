@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useMemo } from "react";
+import { supabase } from "@/lib/supabaseClient";
 // @ts-ignore
 import confetti from "canvas-confetti";
 import { motion, AnimatePresence } from "motion/react";
 import { ImageWithFallback } from "@/app/components/figma/ImageWithFallback";
 import storeImg from "@/imports/z7966254845623_e4ff0bd06df05e58dd727a98a4cafbd9.jpg";
-import bgHills from "@/assets/hills.png";
-import bgSky from "@/assets/sky.png";
+import bgHills from "@/assets/hills.webp";
+import bgSky from "@/assets/sky.webp";
 import { PartnerSection } from "@/app/components/PartnerSection";
 import { WelcomeScreen } from "@/app/components/WelcomeScreen";
 
@@ -325,10 +326,7 @@ function StatusBadge({ status }: { status: ProductStatus }) {
 export default function App() {
   const [view, setView] = useState<View>("landing");
 
-  const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem("ltp_products");
-    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
-  });
+  const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
 
   const [bookings, setBookings] = useState<Booking[]>(() => {
     const saved = localStorage.getItem("ltp_bookings");
@@ -357,8 +355,23 @@ export default function App() {
   };
 
   useEffect(() => {
-    localStorage.setItem("ltp_products", JSON.stringify(products));
-  }, [products]);
+    const fetchProducts = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("products")
+          .select("*")
+          .order("id", { ascending: true });
+        if (error) {
+          console.error("Lỗi khi tải danh sách xe từ Supabase:", error.message);
+        } else if (data) {
+          setProducts(data as Product[]);
+        }
+      } catch (err) {
+        console.error("Lỗi kết nối Supabase:", err);
+      }
+    };
+    fetchProducts();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("ltp_bookings", JSON.stringify(bookings));
@@ -579,7 +592,7 @@ function Hero({ selectedColor, customizerIdx, setCustomizerIdx, activeHotspotId,
             {/* HEADLINE: Max 2 lines on desktop */}
             <h1 className="text-4xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tighter leading-tight text-gray-900">
               XE ĐIỆN THẾ HỆ <br />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-dark via-primary to-primary-dark">
+              <span className="text-primary-dark">
                 THÔNG MINH
               </span>
             </h1>
@@ -648,8 +661,8 @@ function Hero({ selectedColor, customizerIdx, setCustomizerIdx, activeHotspotId,
 
                       {/* Tooltip */}
                       <div className={`absolute bottom-7 left-1/2 -translate-x-1/2 w-56 bg-white border border-gray-100 p-3.5 rounded-xl shadow-xl transition-all duration-300 pointer-events-none group-hover:opacity-100 group-hover:scale-100 ${activeHotspotId === spot.id
-                          ? "opacity-100 scale-100 pointer-events-auto"
-                          : "opacity-0 scale-95"
+                        ? "opacity-100 scale-100 pointer-events-auto"
+                        : "opacity-0 scale-95"
                         }`}>
                         <div className="font-bold text-xs text-primary-dark flex items-center gap-1.5 mb-1">
                           <Zap className="w-3.5 h-3.5" />
@@ -679,8 +692,8 @@ function Hero({ selectedColor, customizerIdx, setCustomizerIdx, activeHotspotId,
                           setActiveHotspotId(null);
                         }}
                         className={`w-6 h-6 rounded-full border-2 transition-all transform hover:scale-115 cursor-pointer ${customizerIdx === idx
-                            ? "border-green-500 scale-110 shadow-[0_0_10px_rgba(34,197,94,0.3)]"
-                            : "border-gray-200"
+                          ? "border-green-500 scale-110 shadow-[0_0_10px_rgba(34,197,94,0.3)]"
+                          : "border-gray-200"
                           }`}
                         style={{ backgroundColor: color.hex }}
                         title={color.name}
@@ -1427,7 +1440,7 @@ function DashboardPreview() {
                 <div className="text-[9px] font-bold text-gray-500 uppercase tracking-wider px-2">Bảng điều khiển</div>
                 <button
                   onClick={() => setActiveTab("overview")}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center gap-2.5 transition-all cursor-pointer ${activeTab === "overview" ? "bg-emerald-50 text-primary-dark font-semibold" : "text-gray-400 hover:bg-gray-100"
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center gap-2.5 transition-all cursor-pointer ${activeTab === "overview" ? "bg-emerald-50 text-primary-dark font-semibold" : "text-emerald-900/40 hover:bg-gray-100"
                     }`}
                 >
                   <Activity className="w-3.5 h-3.5 text-primary" />
@@ -1435,7 +1448,7 @@ function DashboardPreview() {
                 </button>
                 <button
                   onClick={() => setActiveTab("battery")}
-                  className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center gap-2.5 transition-all cursor-pointer ${activeTab === "battery" ? "bg-emerald-50 text-primary-dark font-semibold" : "text-gray-400 hover:bg-gray-100"
+                  className={`w-full text-left px-3 py-2 rounded-xl text-xs flex items-center gap-2.5 transition-all cursor-pointer ${activeTab === "battery" ? "bg-emerald-50 text-primary-dark font-semibold" : "text-emerald-900/40 hover:bg-gray-100"
                     }`}
                 >
                   <Battery className="w-3.5 h-3.5 text-primary" />
@@ -1684,8 +1697,8 @@ function Pricing({ setBookings, bookings }: PricingProps) {
             <div
               key={i}
               className={`rounded-xl p-6.5 border transition-all flex flex-col justify-between eco-card ${plan.highlight
-                  ? "border-primary/40 shadow-xl ring-1 ring-primary/10 relative"
-                  : "border-gray-100 hover:border-primary-dark/20"
+                ? "border-primary/40 shadow-xl ring-1 ring-primary/10 relative"
+                : "border-gray-100 hover:border-primary-dark/20"
                 }`}
             >
               {plan.highlight && (
@@ -1718,8 +1731,8 @@ function Pricing({ setBookings, bookings }: PricingProps) {
               <a
                 href="#booking"
                 className={`block w-full text-center text-[10px] font-bold uppercase tracking-widest py-3 rounded-xl transition-all cursor-pointer ${plan.highlight
-                    ? "bg-gradient-to-r from-primary-dark to-primary text-white shadow-md shadow-green-500/10 shadow-md shadow-green-500/10 hover:opacity-90"
-                    : "bg-gray-50 hover:bg-emerald-50 text-gray-700 border border-gray-200"
+                  ? "bg-gradient-to-r from-primary-dark to-primary text-white shadow-md shadow-green-500/10 hover:opacity-90"
+                  : "bg-gray-50 hover:bg-emerald-50 text-emerald-900 border border-gray-200"
                   }`}
               >
                 Đăng ký ngay
@@ -2088,24 +2101,52 @@ interface ContactProps {
 
 function Contact({ messages, setMessages }: ContactProps) {
   const [form, setForm] = useState({ name: "", phone: "", message: "" });
+  const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setLoading(true);
 
-    const newMsg: ContactMessage = {
-      id: Date.now(),
-      name: form.name,
-      phone: form.phone,
-      message: form.message,
-      status: "unread",
-      createdAt: Date.now()
-    };
+    try {
+      const response = await fetch("http://localhost:5000/api/send-email", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: form.name,
+          phone: form.phone,
+          message: form.message,
+        }),
+      });
 
-    setMessages([newMsg, ...messages]);
-    setSent(true);
-    setForm({ name: "", phone: "", message: "" });
-    setTimeout(() => setSent(false), 5000);
+      const data = await response.json();
+
+      if (response.ok && data.success) {
+        // Lưu cục bộ để hiển thị trong Admin panel nếu cần
+        const newMsg: ContactMessage = {
+          id: Date.now(),
+          name: form.name,
+          phone: form.phone,
+          message: form.message,
+          status: "unread",
+          createdAt: Date.now()
+        };
+        setMessages([newMsg, ...messages]);
+
+        setSent(true);
+        setForm({ name: "", phone: "", message: "" });
+        setTimeout(() => setSent(false), 5000);
+      } else {
+        alert("Gửi email thất bại: " + data.message);
+      }
+    } catch (err: any) {
+      console.error(err);
+      alert("Lỗi kết nối đến server gửi mail: " + err.message);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -2188,9 +2229,11 @@ function Contact({ messages, setMessages }: ContactProps) {
                 </div>
                 <button
                   type="submit"
-                  className="w-full bg-gradient-to-r from-primary-dark to-primary text-white shadow-md shadow-green-500/10 font-bold text-xs uppercase tracking-widest py-3.5 rounded-xl transition-all shadow-md shadow-green-500/10 cursor-pointer"
+                  disabled={loading}
+                  className={`w-full bg-gradient-to-r from-primary-dark to-primary text-white shadow-md shadow-green-500/10 font-bold text-xs uppercase tracking-widest py-3.5 rounded-xl transition-all cursor-pointer ${loading ? "opacity-50 cursor-not-allowed" : ""
+                    }`}
                 >
-                  Gửi lời nhắn
+                  {loading ? "Đang gửi..." : "Gửi lời nhắn"}
                 </button>
               </form>
             )}
@@ -2232,7 +2275,7 @@ function MapSection() {
               </div>
               <h3 className="font-extrabold text-gray-900 text-base leading-snug tracking-tight mt-2">
                 Thế Giới Xe Máy Điện<br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary-dark to-primary">Thế Quỳnh</span>
+                <span className="text-primary-dark">Thế Quỳnh</span>
               </h3>
               <p className="text-gray-500 text-[11px] leading-relaxed">
                 Cửa hàng xe điện nhập khẩu uy tín, chuyên bán &amp; sửa chữa xe máy điện tại Nam Định.
@@ -2466,8 +2509,8 @@ function ChatWidget() {
               {chatList.map((chat, i) => (
                 <div key={i} className={`flex ${chat.sender === "user" ? "justify-end" : "justify-start"}`}>
                   <div className={`p-3 rounded-2xl max-w-[85%] leading-relaxed ${chat.sender === "user"
-                      ? "bg-gradient-to-r from-primary-dark to-primary text-white rounded-br-none"
-                      : "bg-white border border-gray-100 text-gray-700 rounded-bl-none shadow-sm"
+                    ? "bg-gradient-to-r from-primary-dark to-primary text-white rounded-br-none"
+                    : "bg-white border border-gray-100 text-gray-700 rounded-bl-none shadow-sm"
                     }`}>
                     {chat.text}
                   </div>
@@ -2476,10 +2519,10 @@ function ChatWidget() {
 
               {typing && (
                 <div className="flex justify-start">
-                  <div className="bg-white border border-gray-100 p-3 rounded-2xl rounded-bl-none text-gray-600 flex gap-1 items-center shadow-sm">
-                    <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce"></span>
-                    <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce delay-100"></span>
-                    <span className="w-1.5 h-1.5 bg-gray-500 rounded-full animate-bounce delay-200"></span>
+                  <div className="bg-white border border-gray-100 p-3 rounded-2xl rounded-bl-none text-gray-600 flex gap-1.5 items-center shadow-sm">
+                    <span className="w-1.5 h-1.5 bg-primary-dark/60 rounded-full" style={{ animation: 'chatDot 1.2s ease-out infinite' }}></span>
+                    <span className="w-1.5 h-1.5 bg-primary-dark/60 rounded-full" style={{ animation: 'chatDot 1.2s ease-out 0.2s infinite' }}></span>
+                    <span className="w-1.5 h-1.5 bg-primary-dark/60 rounded-full" style={{ animation: 'chatDot 1.2s ease-out 0.4s infinite' }}></span>
                   </div>
                 </div>
               )}
@@ -2494,7 +2537,7 @@ function ChatWidget() {
                     key={script.q}
                     onClick={() => handleAsk(script)}
                     disabled={typing}
-                    className="w-full text-left py-1.5 px-2.5 rounded-xl bg-white hover:bg-emerald-50 hover:text-primary-dark text-[10px] text-gray-600 border border-gray-100 transition-colors cursor-pointer truncate shadow-sm"
+                    className="w-full text-left py-1.5 px-2.5 rounded-xl bg-white hover:bg-emerald-50 hover:text-primary-dark text-[10px] text-emerald-900/70 border border-gray-100 transition-colors cursor-pointer truncate shadow-sm"
                   >
                     {script.q}
                   </button>
@@ -2569,18 +2612,49 @@ function AdminPanel({
     setShowProductForm(true);
   };
 
-  const handleSaveProduct = () => {
-    if (editingProduct) {
-      setProducts(products.map(p => p.id === editingProduct.id ? { ...productForm, id: editingProduct.id } : p));
-    } else {
-      setProducts([{ ...productForm, id: Date.now() }, ...products]);
+  const handleSaveProduct = async () => {
+    try {
+      if (editingProduct) {
+        const { data, error } = await supabase
+          .from("products")
+          .update(productForm)
+          .eq("id", editingProduct.id)
+          .select();
+
+        if (error) throw error;
+        if (data) {
+          setProducts(products.map(p => p.id === editingProduct.id ? data[0] as Product : p));
+        }
+      } else {
+        const { data, error } = await supabase
+          .from("products")
+          .insert([productForm])
+          .select();
+
+        if (error) throw error;
+        if (data) {
+          setProducts([data[0] as Product, ...products]);
+        }
+      }
+      setShowProductForm(false);
+    } catch (error: any) {
+      alert("Lỗi khi lưu sản phẩm: " + error.message);
     }
-    setShowProductForm(false);
   };
 
-  const handleDeleteProduct = (id: number) => {
+  const handleDeleteProduct = async (id: number) => {
     if (window.confirm("Bạn có chắc chắn muốn xoá dòng xe này khỏi kho hàng?")) {
-      setProducts(products.filter(p => p.id !== id));
+      try {
+        const { error } = await supabase
+          .from("products")
+          .delete()
+          .eq("id", id);
+
+        if (error) throw error;
+        setProducts(products.filter(p => p.id !== id));
+      } catch (error: any) {
+        alert("Lỗi khi xoá sản phẩm: " + error.message);
+      }
     }
   };
 
@@ -2679,8 +2753,8 @@ function AdminPanel({
               key={t.id}
               onClick={() => setActiveTab(t.id)}
               className={`flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest py-4.5 border-b-2 transition-all cursor-pointer ${activeTab === t.id
-                  ? "border-primary-dark text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
+                ? "border-primary-dark text-gray-900"
+                : "border-transparent text-gray-500 hover:text-gray-700"
                 }`}
             >
               <t.icon className="w-4 h-4" /> {t.label}
@@ -2820,8 +2894,8 @@ function AdminPanel({
                         <td className="p-4 text-gray-500 font-mono">{b.phone}</td>
                         <td className="p-4">
                           <span className={`px-2 py-0.5 rounded font-bold text-[9px] uppercase border ${b.type === "test_ride"
-                              ? "bg-emerald-500/10 text-primary border-primary/20"
-                              : "bg-green-400/10 text-primary border-green-400/20"
+                            ? "bg-emerald-500/10 text-primary border-primary/20"
+                            : "bg-green-400/10 text-primary border-green-400/20"
                             }`}>
                             {b.type === "test_ride" ? "Lái thử" : "Sửa chữa"}
                           </span>
@@ -2830,10 +2904,10 @@ function AdminPanel({
                         <td className="p-4 text-gray-550 font-mono">{b.date} · {b.time}</td>
                         <td className="p-4">
                           <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${b.status === "confirmed"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                              : b.status === "cancelled"
-                                ? "bg-rose-500/10 text-rose-450 border border-rose-500/20"
-                                : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                            ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                            : b.status === "cancelled"
+                              ? "bg-rose-500/10 text-rose-450 border border-rose-500/20"
+                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                             }`}>
                             {b.status === "confirmed" ? "Đã duyệt" : b.status === "cancelled" ? "Đã huỷ" : "Chờ duyệt"}
                           </span>
@@ -2967,8 +3041,8 @@ function AdminPanel({
                           <td className="p-4 text-gray-500 font-mono">{b.phone}</td>
                           <td className="p-4">
                             <span className={`px-2 py-0.5 rounded font-bold text-[9px] uppercase border ${b.type === "test_ride"
-                                ? "bg-emerald-500/10 text-primary border-primary/20"
-                                : "bg-green-400/10 text-primary border-green-400/20"
+                              ? "bg-emerald-500/10 text-primary border-primary/20"
+                              : "bg-green-400/10 text-primary border-green-400/20"
                               }`}>
                               {b.type === "test_ride" ? "Lái thử" : "Sửa chữa"}
                             </span>
@@ -2977,10 +3051,10 @@ function AdminPanel({
                           <td className="p-4 text-gray-500 font-mono">{b.date} · {b.time}</td>
                           <td className="p-4">
                             <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${b.status === "confirmed"
-                                ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
-                                : b.status === "cancelled"
-                                  ? "bg-rose-500/10 text-rose-450 border border-rose-500/20"
-                                  : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/20"
+                              : b.status === "cancelled"
+                                ? "bg-rose-500/10 text-rose-450 border border-rose-500/20"
+                                : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
                               }`}>
                               {b.status === "confirmed" ? "Đã duyệt" : b.status === "cancelled" ? "Đã huỷ" : "Chờ duyệt"}
                             </span>
@@ -2998,7 +3072,7 @@ function AdminPanel({
                               {b.status !== "cancelled" && (
                                 <button
                                   onClick={() => handleUpdateBookingStatus(b.id, "cancelled")}
-                                  className="px-2.5 py-1.5 bg-white/5 hover:bg-rose-500/10 text-gray-400 hover:text-rose-400 rounded text-[9px] font-bold uppercase border border-gray-200 hover:border-rose-500/20 transition-all cursor-pointer"
+                                  className="px-2.5 py-1.5 bg-white/5 hover:bg-rose-500/10 text-rose-700/60 hover:text-rose-600 rounded text-[9px] font-bold uppercase border border-rose-200/60 hover:border-rose-500/20 transition-all cursor-pointer"
                                 >
                                   Huỷ
                                 </button>
@@ -3030,8 +3104,8 @@ function AdminPanel({
                   <div
                     key={m.id}
                     className={`p-5 rounded-2xl border transition-all flex flex-col justify-between ${m.status === "unread"
-                        ? "border-green-500/30 bg-emerald-500/[0.02] relative"
-                        : "border-gray-100 bg-white"
+                      ? "border-green-500/30 bg-emerald-500/[0.02] relative"
+                      : "border-gray-100 bg-white"
                       }`}
                   >
                     {m.status === "unread" && (
