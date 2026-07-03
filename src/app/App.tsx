@@ -9,6 +9,15 @@ import bgHills from "@/assets/hills.webp";
 import bgSky from "@/assets/sky.webp";
 import { PartnerSection } from "@/app/components/PartnerSection";
 import { WelcomeScreen } from "@/app/components/WelcomeScreen";
+import { WarrantyPolicyPage } from "@/app/components/service-pages/WarrantyPolicyPage";
+import { PrivacyPolicyPage } from "@/app/components/service-pages/PrivacyPolicyPage";
+import { QualityCommitmentPage } from "@/app/components/service-pages/QualityCommitmentPage";
+import { ShowroomGuaranteePage } from "@/app/components/service-pages/ShowroomGuaranteePage";
+import { UsageGuidePage } from "@/app/components/service-pages/UsageGuidePage";
+import { FaqPage } from "@/app/components/service-pages/FaqPage";
+import { BlogSection } from "@/app/components/blog/BlogSection";
+import { BlogPage } from "@/app/components/blog/BlogPage";
+import { BlogDetailsPage } from "@/app/components/blog/BlogDetailsPage";
 
 const ECO_SECTION_BG = {
   backgroundImage: `url(${bgHills})`,
@@ -45,7 +54,7 @@ import {
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-type View = "landing" | "admin";
+type View = "landing" | "admin" | "blog" | "blog-detail" | "warranty-policy" | "privacy-policy" | "quality-commitment" | "showroom-guarantee" | "payment-method" | "usage-guide" | "faq";
 type ProductStatus = "available" | "sold_out" | "incoming";
 
 interface Product {
@@ -325,6 +334,7 @@ function StatusBadge({ status }: { status: ProductStatus }) {
 
 export default function App() {
   const [view, setView] = useState<View>("landing");
+  const [selectedBlogId, setSelectedBlogId] = useState<string>("");
 
   const [products, setProducts] = useState<Product[]>(INITIAL_PRODUCTS);
 
@@ -402,6 +412,76 @@ export default function App() {
     );
   }
 
+  const isServicePage = ["warranty-policy", "privacy-policy", "quality-commitment", "showroom-guarantee", "payment-method", "usage-guide", "faq"].includes(view);
+  const isBlogPage = view === "blog" || view === "blog-detail";
+
+  const openBlogListing = () => {
+    setView("blog");
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
+
+  const openBlogPost = (postId: string) => {
+    setSelectedBlogId(postId);
+    setView("blog-detail");
+    window.scrollTo({ top: 0, behavior: "auto" });
+  };
+
+  const scrollToSection = (sectionId: string) => {
+    if (typeof window === "undefined") return;
+
+    if (sectionId === "top") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    const target = document.getElementById(sectionId);
+    if (target) {
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const handleNavigateToSection = (sectionId: string) => {
+    if (sectionId === "blog") {
+      if (isServicePage || isBlogPage) {
+        openBlogListing();
+        return;
+      }
+      scrollToSection("blog");
+      return;
+    }
+
+    if (isServicePage || isBlogPage) {
+      setView("landing");
+      window.setTimeout(() => scrollToSection(sectionId), 80);
+      return;
+    }
+
+    scrollToSection(sectionId);
+  };
+
+  const servicePageContent = (() => {
+    switch (view) {
+      case "warranty-policy":
+        return <WarrantyPolicyPage setView={setView} />;
+      case "privacy-policy":
+        return <PrivacyPolicyPage setView={setView} />;
+      case "quality-commitment":
+        return <QualityCommitmentPage setView={setView} />;
+      case "showroom-guarantee":
+        return <ShowroomGuaranteePage setView={setView} />;
+      case "payment-method":
+        return <PaymentMethodPage setView={setView} />;
+      case "usage-guide":
+        return <UsageGuidePage setView={setView} />;
+      case "faq":
+        return <FaqPage setView={setView} />;
+      default:
+        return null;
+    }
+  })();
+
   return (
     <>
       <AnimatePresence>
@@ -412,26 +492,45 @@ export default function App() {
       <div className="min-h-screen bg-gradient-to-b from-sky-mist via-[#f0fdf4] to-white text-gray-800 font-sans relative overflow-hidden selection:bg-primary/20 selection:text-gray-900">
         <div className="absolute top-0 inset-x-0 h-[50vh] bg-gradient-to-b from-sky-200/30 via-sky-100/15 to-transparent pointer-events-none z-0" />
 
-        <Navbar setView={setView} isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} />
-        <Hero
-          selectedColor={selectedCustomizerColor}
-          customizerIdx={customizerIdx}
-          setCustomizerIdx={setCustomizerIdx}
-          activeHotspotId={activeHotspotId}
-          setActiveHotspotId={setActiveHotspotId}
-        />
-        <FeatureCommitments />
-        <BikeQuiz products={products} />
-        <ProductsCatalog products={products} setBookings={setBookings} bookings={bookings} />
-        <DashboardPreview />
-        <Services />
-        <Pricing setBookings={setBookings} bookings={bookings} />
-        <Testimonials />
-        <PartnerSection />
-        <BookingSection products={products} bookings={bookings} setBookings={setBookings} />
-        <Contact messages={messages} setMessages={setMessages} />
-        <MapSection />
-        <Footer />
+        <Navbar setView={setView} isDarkMode={isDarkMode} setIsDarkMode={setIsDarkMode} onNavigateToSection={handleNavigateToSection} />
+        {isBlogPage ? (
+          <section className="relative z-10 bg-gradient-to-b from-white via-[#f7fef9] to-white">
+            {view === "blog" ? (
+              <BlogPage setView={setView} setSelectedBlogId={setSelectedBlogId} />
+            ) : (
+              <BlogDetailsPage postId={selectedBlogId} setView={setView} />
+            )}
+          </section>
+        ) : isServicePage ? (
+          <section className="relative z-10 bg-gradient-to-b from-white via-[#f7fef9] to-white py-14 sm:py-18">
+            <div className="mx-auto max-w-6xl px-6 sm:px-8 lg:px-10">{servicePageContent}</div>
+          </section>
+        ) : (
+          <>
+            <Hero
+              selectedColor={selectedCustomizerColor}
+              customizerIdx={customizerIdx}
+              setCustomizerIdx={setCustomizerIdx}
+              activeHotspotId={activeHotspotId}
+              setActiveHotspotId={setActiveHotspotId}
+            />
+            <FeatureCommitments />
+            <BikeQuiz products={products} />
+            <ProductsCatalog products={products} setBookings={setBookings} bookings={bookings} />
+            <Services />
+            <Pricing setBookings={setBookings} bookings={bookings} />
+            <Testimonials />
+            <PartnerSection />
+            <BlogSection
+              sectionBgStyle={ECO_SECTION_BG}
+              onViewAll={openBlogListing}
+              onReadPost={openBlogPost}
+            />
+            <Contact messages={messages} setMessages={setMessages} />
+            <MapSection />
+          </>
+        )}
+        <Footer setView={setView} />
         <ChatWidget />
 
         {/* Floating Left Side Quick Contacts */}
@@ -468,9 +567,10 @@ interface NavbarProps {
   setView: (v: View) => void;
   isDarkMode: boolean;
   setIsDarkMode: (d: boolean) => void;
+  onNavigateToSection: (sectionId: string) => void;
 }
 
-function Navbar({ setView, isDarkMode, setIsDarkMode }: NavbarProps) {
+function Navbar({ setView, isDarkMode, setIsDarkMode, onNavigateToSection }: NavbarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
@@ -484,12 +584,11 @@ function Navbar({ setView, isDarkMode, setIsDarkMode }: NavbarProps) {
 
   const links = [
     { label: "Sản phẩm", href: "#products" },
-    { label: "Kết nối", href: "#dashboard-preview" },
-    { label: "Trắc nghiệm", href: "#bike-quiz" },
+    { label: "Khảo sát", href: "#bike-quiz" },
     { label: "Dịch vụ", href: "#services" },
     { label: "Bảng giá", href: "#pricing" },
     { label: "Đối tác", href: "#partner" },
-    { label: "Đặt lịch", href: "#booking" },
+    { label: "Blog", href: "#blog" },
     { label: "Liên hệ", href: "#contact" },
   ];
 
@@ -498,7 +597,11 @@ function Navbar({ setView, isDarkMode, setIsDarkMode }: NavbarProps) {
       }`}>
       <div className="max-w-7xl mx-auto px-6 flex items-center justify-between">
         {/* Brand Logo */}
-        <a href="#" className="flex items-center gap-2.5 shrink-0">
+        <button
+          type="button"
+          onClick={() => onNavigateToSection("top")}
+          className="flex items-center gap-2.5 shrink-0"
+        >
           <div className="w-8 h-8 bg-gradient-to-tr from-primary-dark to-primary rounded-xl flex items-center justify-center text-white shadow-md shadow-green-500/20">
             <Zap className="w-4 h-4" />
           </div>
@@ -506,18 +609,19 @@ function Navbar({ setView, isDarkMode, setIsDarkMode }: NavbarProps) {
             <span className="font-bold text-gray-900 text-sm tracking-wider uppercase block font-mono">THẾ QUỲNH</span>
             <span className="text-[9px] text-gray-500 uppercase tracking-widest mt-0.5 block">XE ĐIỆN NAM ĐỊNH</span>
           </div>
-        </a>
+        </button>
 
         {/* Central Menu Nav Links */}
         <div className="hidden md:flex items-center gap-8">
           {links.map((link) => (
-            <a
+            <button
               key={link.label}
-              href={link.href}
+              type="button"
+              onClick={() => onNavigateToSection(link.href.replace("#", "") || "top")}
               className="text-xs text-gray-600 hover:text-primary-dark transition-colors tracking-wide font-medium"
             >
               {link.label}
-            </a>
+            </button>
           ))}
         </div>
 
@@ -550,14 +654,17 @@ function Navbar({ setView, isDarkMode, setIsDarkMode }: NavbarProps) {
             className="md:hidden border-b border-gray-100 bg-white/95 backdrop-blur-md px-6 py-6 space-y-3.5 shadow-lg absolute top-full left-0 right-0"
           >
             {links.map((l) => (
-              <a
+              <button
                 key={l.label}
-                href={l.href}
-                onClick={() => setMobileMenuOpen(false)}
-                className="block text-sm text-gray-600 py-2.5 font-medium border-b border-gray-100 last:border-0 hover:text-primary-dark"
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  onNavigateToSection(l.href.replace("#", "") || "top");
+                }}
+                className="block w-full text-left text-sm text-gray-600 py-2.5 font-medium border-b border-gray-100 last:border-0 hover:text-primary-dark"
               >
                 {l.label}
-              </a>
+              </button>
             ))}
           </motion.div>
         )}
@@ -612,10 +719,10 @@ function Hero({ selectedColor, customizerIdx, setCustomizerIdx, activeHotspotId,
                 <ArrowRight className="w-4 h-4" />
               </a>
               <a
-                href="#booking"
+                href="#blog"
                 className="inline-flex items-center gap-2 bg-white hover:bg-gray-50 text-gray-700 font-bold text-xs tracking-wide px-7 py-3.5 rounded-xl border border-gray-250 hover:border-gray-300 shadow-sm active:scale-[0.98] transition-all"
               >
-                Đăng ký lái thử
+                Blog xe điện
               </a>
             </div>
           </div>
@@ -983,10 +1090,10 @@ function BikeQuiz({ products }: { products: Product[] }) {
                       <div className="flex items-center justify-between pt-2 border-t border-gray-150">
                         <span className="text-xs font-bold text-primary-dark">{formatPrice(recommendedBike.price)}</span>
                         <a
-                          href="#booking"
+                          href="#blog"
                           className="bg-gradient-to-r from-primary-dark to-primary text-white shadow-md shadow-green-500/10 text-[9px] font-bold uppercase tracking-wider px-3.5 py-2 rounded-lg shadow-md hover:from-blue-550 hover:to-purple-550 transition-colors"
                         >
-                          Đăng ký
+                          Xem blog
                         </a>
                       </div>
                     </div>
@@ -1278,7 +1385,7 @@ function ProductsCatalog({ products, setBookings, bookings }: ProductsCatalogPro
                       <div className="text-lg font-extrabold text-rose-500">{formatPrice(quickViewProduct.price)}</div>
                     </div>
                     <a
-                      href="#booking"
+                      href="#blog"
                       onClick={() => setQuickViewProduct(null)}
                       className="bg-gradient-to-r from-primary-dark to-primary hover:from-primary hover:to-primary-light text-white shadow-md shadow-green-500/10 font-bold text-xs px-6 py-3 rounded-xl transition-all"
                     >
@@ -1354,6 +1461,7 @@ function ProductCard({ p, setQuickViewProduct }: ProductCardProps) {
 }
 
 
+<<<<<<< Updated upstream
 // ─── Dashboard Preview Component (tasteskill) ───────────────────────────────
 
 function DashboardPreview() {
@@ -1625,6 +1733,8 @@ function DashboardPreview() {
   );
 }
 
+=======
+>>>>>>> Stashed changes
 // ─── Services Component ──────────────────────────────────────────────────────
 
 function Services() {
@@ -1729,7 +1839,7 @@ function Pricing({ setBookings, bookings }: PricingProps) {
               </div>
 
               <a
-                href="#booking"
+                href="#blog"
                 className={`block w-full text-center text-[10px] font-bold uppercase tracking-widest py-3 rounded-xl transition-all cursor-pointer ${plan.highlight
                   ? "bg-gradient-to-r from-primary-dark to-primary text-white shadow-md shadow-green-500/10 hover:opacity-90"
                   : "bg-gray-50 hover:bg-emerald-50 text-emerald-900 border border-gray-200"
@@ -1782,310 +1892,6 @@ function Testimonials() {
               </div>
             </div>
           ))}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-// ─── Booking Section ─────────────────────────────────────────────────────────
-
-interface BookingSectionProps {
-  products: Product[];
-  bookings: Booking[];
-  setBookings: React.Dispatch<React.SetStateAction<Booking[]>>;
-}
-
-function BookingSection({ products, bookings, setBookings }: BookingSectionProps) {
-  const [form, setForm] = useState({ name: "", phone: "", type: "test_ride" as Booking["type"], date: "", time: "08:00", target: "" });
-  const [ticketDetails, setTicketDetails] = useState<Booking | null>(null);
-
-  useEffect(() => {
-    if (form.type === "test_ride") {
-      setForm(f => ({ ...f, target: products[0]?.name || "" }));
-    } else {
-      setForm(f => ({ ...f, target: "Tiêu chuẩn" }));
-    }
-  }, [form.type, products]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const newBooking: Booking = {
-      id: Date.now(),
-      name: form.name,
-      phone: form.phone,
-      type: form.type,
-      date: form.date,
-      time: form.time,
-      target: form.target,
-      status: "pending",
-      createdAt: Date.now(),
-    };
-
-    setBookings([newBooking, ...bookings]);
-    setTicketDetails(newBooking);
-
-    setForm({
-      name: "",
-      phone: "",
-      type: "test_ride",
-      date: "",
-      time: "08:00",
-      target: products[0]?.name || ""
-    });
-
-    try {
-      confetti({
-        particleCount: 70,
-        spread: 60,
-        colors: ["#10b981", "#34d399", "#ffffff"],
-        origin: { y: 0.7 }
-      });
-    } catch (err) { }
-  };
-
-  return (
-    <section id="booking" className="py-24 border-t border-gray-100 relative" style={ECO_SECTION_BG}>
-      <div className="eco-section-overlay" />
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="grid lg:grid-cols-12 gap-12 items-center">
-
-          {/* Booking Info: EYEBROW (Exactly 1 of 3 eyebrows) */}
-          <div className="lg:col-span-5 text-left space-y-6">
-            <span className="inline-block bg-emerald-50 border border-primary/35 text-primary-dark text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-full">
-              SECURE BOOKING SYSTEM
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-800 tracking-tight">
-              ĐĂNG KÝ <span className="eco-gradient-text">TRỰC TUYẾN</span>
-            </h2>
-            <p className="text-gray-600 text-xs leading-relaxed font-medium">
-              Bạn có thể dễ dàng đặt lịch lái thử dòng xe điện mới nhất hoàn toàn miễn phí hoặc đăng ký bảo dưỡng để tiết kiệm thời gian chờ đợi.
-            </p>
-
-            <div className="space-y-4">
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 bg-emerald-50 rounded-xl border border-green-100 flex items-center justify-center text-primary-dark">
-                  <ShieldCheck className="w-4.5 h-4.5" />
-                </div>
-                <div>
-                  <div className="font-bold text-xs text-gray-900">Xác thực tức thì</div>
-                  <p className="text-[10px] text-gray-500">Hệ thống tạo mã vé điện tử QR Code xác minh ngay lập tức.</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3">
-                <div className="w-9 h-9 bg-emerald-50 rounded-xl border border-green-100 flex items-center justify-center text-primary-dark">
-                  <Clock className="w-4.5 h-4.5" />
-                </div>
-                <div>
-                  <div className="font-bold text-xs text-gray-900">Tiết kiệm thời gian</div>
-                  <p className="text-[10px] text-gray-500">Được kỹ thuật tiếp nhận ngay khi đến tiệm, không phải xếp hàng.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Form / Ticket output */}
-          <div className="lg:col-span-7">
-            {!ticketDetails ? (
-              <div className="eco-card rounded-2xl p-6 sm:p-8 relative">
-                <h3 className="font-bold text-gray-800 text-sm mb-1 uppercase tracking-wide">
-                  NHẬP THÔNG TIN ĐĂNG KÝ
-                </h3>
-                <p className="text-[10px] text-gray-500 mb-6 uppercase tracking-wider">Hệ thống quản lý lịch hẹn tự động</p>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[9px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Họ và tên</label>
-                      <input
-                        type="text" required value={form.name}
-                        onChange={(e) => setForm({ ...form, name: e.target.value })}
-                        placeholder="Nguyễn Văn A"
-                        className="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-xs text-gray-800 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-gray-400"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[9px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Số điện thoại</label>
-                      <input
-                        type="tel" required value={form.phone}
-                        onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                        placeholder="09xx xxx xxx"
-                        className="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-xs text-gray-800 outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-gray-400"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[9px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Yêu cầu đăng ký</label>
-                      <select
-                        value={form.type}
-                        onChange={(e) => setForm({ ...form, type: e.target.value as Booking["type"] })}
-                        className="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-xs text-gray-800 outline-none focus:border-primary/40 cursor-pointer shadow-sm"
-                      >
-                        <option value="test_ride">Đăng ký Lái thử xe</option>
-                        <option value="maintenance">Đặt lịch Bảo dưỡng/Sửa chữa</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-[9px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">
-                        {form.type === "test_ride" ? "Chọn dòng xe lái thử" : "Chọn gói dịch vụ"}
-                      </label>
-                      {form.type === "test_ride" ? (
-                        <select
-                          value={form.target}
-                          onChange={(e) => setForm({ ...form, target: e.target.value })}
-                          className="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-xs text-gray-800 outline-none focus:border-primary/40 cursor-pointer shadow-sm"
-                        >
-                          {products.map(p => (
-                            <option key={p.id} value={p.name}>{p.name} ({p.brand})</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <select
-                          value={form.target}
-                          onChange={(e) => setForm({ ...form, target: e.target.value })}
-                          className="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-xs text-gray-800 outline-none focus:border-primary/40 cursor-pointer shadow-sm"
-                        >
-                          <option value="Cơ bản">Bảo dưỡng Cơ bản (150.000đ)</option>
-                          <option value="Tiêu chuẩn">Bảo dưỡng Tiêu chuẩn (350.000đ)</option>
-                          <option value="Cao cấp">Bảo dưỡng Cao cấp (650.000đ)</option>
-                          <option value="Khác">Sửa chữa hỏng hóc khác</option>
-                        </select>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-[9px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Chọn ngày hẹn</label>
-                      <input
-                        type="date" required value={form.date}
-                        onChange={(e) => setForm({ ...form, date: e.target.value })}
-                        className="w-full border border-gray-250 bg-white rounded-xl px-4 py-2 text-xs text-gray-700 outline-none focus:border-green-500/40 transition-all"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-[9px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">Chọn khung giờ</label>
-                      <select
-                        value={form.time}
-                        onChange={(e) => setForm({ ...form, time: e.target.value })}
-                        className="w-full border border-gray-200 bg-white rounded-xl px-4 py-2.5 text-xs text-gray-800 outline-none focus:border-primary/40 cursor-pointer shadow-sm"
-                      >
-                        <option value="08:00">08:00 - Sáng</option>
-                        <option value="09:30">09:30 - Sáng</option>
-                        <option value="11:00">11:00 - Trưa</option>
-                        <option value="13:30">13:30 - Chiều</option>
-                        <option value="15:00">15:00 - Chiều</option>
-                        <option value="16:30">16:30 - Chiều</option>
-                      </select>
-                    </div>
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full bg-gradient-to-r from-primary-dark to-primary text-white shadow-md shadow-green-500/10 font-bold text-xs uppercase tracking-widest py-3.5 rounded-xl transition-all shadow-md shadow-green-500/10 cursor-pointer mt-4"
-                  >
-                    Gửi yêu cầu & Tạo vé điện tử
-                  </button>
-                </form>
-              </div>
-            ) : (
-              /* Apple Wallet Pass Styled Ticket */
-              <div className="max-w-md mx-auto animate-fade-in space-y-6">
-                <div className="eco-card rounded-2xl overflow-hidden relative">
-
-                  <div className="h-1.5 w-full bg-gradient-to-r from-primary-dark to-primary"></div>
-
-                  <div className="p-5 border-b border-dashed border-gray-200 flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <Zap className="w-5 h-5 text-primary animate-pulse" />
-                      <span className="font-bold text-gray-700 text-xs tracking-wider font-mono">LTP WALLET PASS</span>
-                    </div>
-                    <span className="text-[9px] text-primary font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-primary/20 uppercase font-mono">
-                      XÁC NHẬN
-                    </span>
-                  </div>
-
-                  <div className="p-6 space-y-5 relative">
-                    <div className="absolute top-1/2 -left-3 w-6 h-6 bg-white border-r border-gray-200 rounded-full -translate-y-1/2 shadow-sm"></div>
-                    <div className="absolute top-1/2 -right-3 w-6 h-6 bg-white border-l border-gray-200 rounded-full -translate-y-1/2 shadow-sm"></div>
-
-                    <div className="grid grid-cols-2 gap-4 text-left">
-                      <div>
-                        <div className="text-[9px] text-gray-500 uppercase tracking-widest">Khách hàng</div>
-                        <div className="text-xs font-bold text-gray-900 mt-1">{ticketDetails.name}</div>
-                      </div>
-                      <div>
-                        <div className="text-[9px] text-gray-500 uppercase tracking-widest">Điện thoại</div>
-                        <div className="text-xs font-bold text-gray-900 mt-1">{ticketDetails.phone}</div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-left">
-                      <div>
-                        <div className="text-[9px] text-gray-500 uppercase tracking-widest">Loại lịch hẹn</div>
-                        <div className="text-xs font-bold text-primary mt-1 uppercase tracking-wider font-mono">
-                          {ticketDetails.type === "test_ride" ? "LÁI THỬ XE" : "BẢO DƯỠNG"}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[9px] text-gray-500 uppercase tracking-widest">Đăng ký cho</div>
-                        <div className="text-xs font-bold text-gray-900 mt-1 truncate">{ticketDetails.target}</div>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-left">
-                      <div>
-                        <div className="text-[9px] text-gray-500 uppercase tracking-widest">Thời gian</div>
-                        <div className="text-xs font-bold text-gray-900 mt-1 flex items-center gap-1.5 font-mono">
-                          <Calendar className="w-3.5 h-3.5 text-primary" />
-                          {ticketDetails.date}
-                        </div>
-                      </div>
-                      <div>
-                        <div className="text-[9px] text-gray-500 uppercase tracking-widest">Giờ hẹn</div>
-                        <div className="text-xs font-bold text-gray-900 mt-1 flex items-center gap-1.5 font-mono">
-                          <Clock className="w-3.5 h-3.5 text-primary" />
-                          {ticketDetails.time}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="pt-2 border-t border-gray-150 text-left">
-                      <div className="text-[9px] text-gray-500 uppercase tracking-widest">Địa điểm</div>
-                      <div className="text-xs font-semibold text-gray-450 mt-1">Showroom Thế Giới Xe Điện Thế Quỳnh, Nam Định</div>
-                    </div>
-                  </div>
-
-                  <div className="bg-[#121218] p-5 flex flex-col items-center justify-center border-t border-dashed border-gray-200">
-                    <div className="bg-white p-3 rounded-xl shadow-lg mb-3">
-                      <QrCode className="w-24 h-24 text-black" />
-                    </div>
-                    <div className="text-[10px] text-gray-550 font-mono tracking-widest uppercase">
-                      TICKET_ID: TQ-{ticketDetails.id.toString().slice(-6)}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex gap-3 justify-center">
-                  <button
-                    onClick={() => setTicketDetails(null)}
-                    className="flex-1 bg-white/5 hover:bg-gray-200 text-gray-700 font-bold text-xs py-3 rounded-xl border border-gray-200 transition-all cursor-pointer text-center"
-                  >
-                    Đặt lịch khác
-                  </button>
-                  <button
-                    onClick={() => window.print()}
-                    className="flex-1 bg-gradient-to-r from-primary-dark to-primary text-white shadow-md shadow-green-500/10 font-bold text-xs py-3 rounded-xl transition-all shadow-md shadow-green-500/10 cursor-pointer text-center"
-                  >
-                    In / Lưu vé
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
-
         </div>
       </div>
     </section>
@@ -2289,7 +2095,7 @@ function MapSection() {
                   icon: MapPin,
                   label: "Địa chỉ",
                   value: "Cống Ông Cơn, Yên Nghĩa, Ý Yên, Nam Định",
-                  href: "https://maps.google.com/?q=Yên+Nghĩa,+Ý+Yên,+Nam+Định",
+                  href: "https://www.google.com/maps?q=20.3778199,105.9763741",
                   linkLabel: "Xem trên Maps →"
                 },
                 {
@@ -2335,7 +2141,7 @@ function MapSection() {
 
             {/* CTA */}
             <a
-              href="https://maps.google.com/?q=Yên+Nghĩa,+Ý+Yên,+Nam+Định"
+              href="https://www.google.com/maps?q=20.3778199,105.9763741"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center justify-center gap-2 w-full bg-gradient-to-r from-primary-dark to-primary hover:from-primary hover:to-primary-light text-white font-bold text-xs tracking-wide py-2.5 rounded-xl shadow-md shadow-green-500/15 hover:scale-[1.01] active:scale-[0.98] transition-all"
@@ -2351,7 +2157,7 @@ function MapSection() {
             <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-primary-dark via-primary to-primary-light z-10 pointer-events-none" />
             <iframe
               title="Vị trí Thế Giới Xe Máy Điện Thế Quỳnh"
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3726.4!2d106.22!3d20.25!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31360b4e9a1b7c3f%3A0x0!2sY%C3%AAn+Ngh%C4%A9a%2C+%C3%9D+Y%C3%AAn%2C+Nam+%C4%90%E1%BB%8Bnh!5e0!3m2!1svi!2svn!4v1700000000000!5m2!1svi!2svn&q=Yên+Nghĩa,+Ý+Yên,+Nam+Định,+Việt+Nam"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3874.020693338673!2d105.9763741!3d20.3778199!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3135d824245ae00d%3A0xdd1c03ae8031c170!2zQ-G7p25nIE7GsMahbmcgQ-G7p2k!5e0!3m2!1svi!2s!4v1710000000000!5m2!1svi!2s"
               width="100%"
               height="100%"
               style={{ border: 0, minHeight: "280px", display: "block" }}
@@ -2370,7 +2176,7 @@ function MapSection() {
 
 // ─── Footer Component ────────────────────────────────────────────────────────
 
-function Footer() {
+function Footer({ setView }: { setView: (view: View) => void }) {
   return (
     <footer className="bg-gradient-to-b from-white to-green-50/50 border-t border-gray-100 relative z-10" style={ECO_SECTION_BG}>
       <div className="eco-section-overlay opacity-50" />
@@ -2390,13 +2196,14 @@ function Footer() {
           </div>
 
           <div className="space-y-4">
-            <div className="font-bold text-gray-700 text-xs uppercase tracking-wide">Đường dẫn nhanh</div>
+            <div className="font-bold text-gray-700 text-xs uppercase tracking-wide">Dịch vụ hậu mãi</div>
             <ul className="space-y-2.5 text-xs text-gray-500">
-              <li><a href="#products" className="hover:text-primary transition-colors">Danh sách sản phẩm</a></li>
-              <li><a href="#bike-quiz" className="hover:text-primary transition-colors">Trắc nghiệm chọn xe</a></li>
-              <li><a href="#services" className="hover:text-primary transition-colors">Dịch vụ sửa chữa</a></li>
-              <li><a href="#partner" className="hover:text-primary transition-colors">Đối tác Thế Quỳnh</a></li>
-              <li><a href="#booking" className="hover:text-primary transition-colors">Đặt lịch trực tuyến</a></li>
+              <li><button type="button" onClick={() => setView("warranty-policy")} className="text-left hover:text-primary transition-colors">Chính sách bảo hành</button></li>
+              <li><button type="button" onClick={() => setView("privacy-policy")} className="text-left hover:text-primary transition-colors">Chính sách bảo mật</button></li>
+              <li><button type="button" onClick={() => setView("quality-commitment")} className="text-left hover:text-primary transition-colors">Cam kết chất lượng tốt nhất</button></li>
+              <li><button type="button" onClick={() => setView("showroom-guarantee")} className="text-left hover:text-primary transition-colors">Gian hàng đảm bảo</button></li>
+              <li><button type="button" onClick={() => setView("usage-guide")} className="text-left hover:text-primary transition-colors">Hướng dẫn sử dụng</button></li>
+              <li><button type="button" onClick={() => setView("faq")} className="text-left hover:text-primary transition-colors">Câu hỏi thường gặp</button></li>
             </ul>
           </div>
 

@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { motion } from "motion/react";
 import {
   ShoppingBag,
@@ -15,6 +16,9 @@ import {
   Star,
   CheckCircle,
 } from "lucide-react";
+
+import dibaoLogo from "../../assets/dibao.png";
+import vespaLogo from "../../assets/vespa.png";
 
 // ─── Data ─────────────────────────────────────────────────────────────────────
 
@@ -125,9 +129,59 @@ const fadeUp = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] } },
 };
 
-// ─── Component ────────────────────────────────────────────────────────────────
+function PartnerLogosSlider({ logos }: { logos: { src: string; alt: string }[] }) {
+  const [activePartner, setActivePartner] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setActivePartner((prev) => (prev === 0 ? 1 : 0));
+    }, 4000);
+    return () => clearInterval(timer);
+  }, []);
+
+  return (
+    <div className="relative h-64 flex justify-center items-center" style={{ perspective: 1000 }}>
+      {logos.map((logo, idx) => {
+        const isActive = activePartner === idx;
+        return (
+          <motion.div
+            key={logo.alt}
+            initial={false}
+            animate={{
+              scale: isActive ? 1 : 0.85,
+              opacity: isActive ? 1 : 0.4,
+              y: isActive ? 0 : -35,
+              rotateX: isActive ? 0 : 5,
+            }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className={`absolute rounded-3xl p-2 cursor-pointer
+              ${isActive 
+                ? "bg-gray-900 border border-gray-800 shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] shadow-emerald-500/10" 
+                : "bg-gray-800 border border-gray-800 shadow-none"}
+            `}
+            style={{ zIndex: isActive ? 10 : 5 }}
+            onClick={() => setActivePartner(idx)}
+          >
+            <div className={`rounded-2xl flex items-center justify-center px-12 py-8 min-w-[280px] sm:min-w-[320px] transition-colors duration-500 ${isActive ? "bg-white" : "bg-white/80"}`}>
+              <img 
+                src={logo.src} 
+                alt={logo.alt} 
+                className={`w-auto h-20 sm:h-24 object-contain transition-all duration-500 ${isActive ? "grayscale-0" : "grayscale"}`} 
+              />
+            </div>
+          </motion.div>
+        );
+      })}
+    </div>
+  );
+}
 
 export function PartnerSection() {
+  const logos = [
+    { src: dibaoLogo, alt: "DiBao" },
+    { src: vespaLogo, alt: "Vespa" }
+  ];
+
   return (
     <section
       id="partner"
@@ -183,6 +237,9 @@ export function PartnerSection() {
           </div>
         </motion.div>
 
+        {/* ── Partner Logos 3D Slider ── */}
+        <PartnerLogosSlider logos={logos} />
+
         {/* ── Services Grid ── */}
         <div className="space-y-8">
           <motion.div
@@ -223,6 +280,8 @@ export function PartnerSection() {
               </motion.div>
             ))}
           </motion.div>
+
+          {/* Logo 3D Slider was moved to top */}
         </div>
 
         {/* ── Benefits strip ── */}
